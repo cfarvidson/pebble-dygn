@@ -1,0 +1,29 @@
+{
+  "name": "dygn",
+  "author": "Carl-Fredrik Arvidson",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Dygn",
+    "uuid": "a3d9f4c1-7e28-4b6a-8c5d-2f0e9b1a6d73",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "emery"
+    ],
+    "capabilities": [
+      "configurable"
+    ],
+    "watchapp": {
+      "watchface": true
+    },
+    "messageKeys": [
+      "USE_12H"
+    ],
+    "resources": {
+      "media": []
+    }
+  }
+}

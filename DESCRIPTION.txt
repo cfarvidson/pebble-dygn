@@ -1,0 +1,3 @@
+24-hour watchface with a single hand for Pebble Time 2. One rotation per day: midnight (24) at the top, noon (12) at the bottom. Black dial, white numerals, minute dots, a red hand. Optional 12-hour numerals in the settings.
+
+Based on WatchPebble by cy8aer (github.com/cy8aer/WatchPebble), adapted for the Pebble Time 2 screen and without the minute hand.
