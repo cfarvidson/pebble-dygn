@@ -2,21 +2,26 @@
 
 // 24-hour one-hand watchface for Pebble Time 2 (emery, 200x228).
 // Clone of WatchPebble by cy8aer (https://github.com/cy8aer/WatchPebble),
-// without the minute hand. Midnight (24) at the top, noon (12) at the bottom.
+// without the minute hand. Midnight (24) at the top by default, or noon at the
+// top with the "24 at the top" setting off.
 
-#define PKEY_USE_12H 1
+#define PKEY_USE_12H      1
+#define PKEY_MIDNIGHT_TOP 2
 
 static Window *s_window;
 static Layer  *s_canvas_layer;
-static bool    s_use_12h = false;
+static bool    s_use_12h      = false;
+static bool    s_midnight_top = true;
 
-// Midnight = top = 0; noon = bottom = TRIG_MAX_ANGLE/2.
+// Top = 0. Midnight at the top by default; with s_midnight_top off the dial is
+// rotated half a turn so noon is at the top.
 static int32_t minutes_to_angle(int local_min) {
-  return (int32_t)((int64_t)TRIG_MAX_ANGLE * (local_min % (24 * 60)) / (24 * 60));
+  int shifted = local_min + (s_midnight_top ? 0 : 12 * 60);
+  return (int32_t)((int64_t)TRIG_MAX_ANGLE * (shifted % (24 * 60)) / (24 * 60));
 }
 
 static int32_t hour_to_angle(int h) {
-  return (int32_t)((int64_t)TRIG_MAX_ANGLE * (h % 24) / 24);
+  return minutes_to_angle(h * 60);
 }
 
 static int32_t minute_to_angle(int m) {
@@ -59,7 +64,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
                             polar(center, radius - 1 - tick_len, angle));
   }
 
-  // Numerals 1-24, 24 at the top. Larger at 24, 6, 12 and 18.
+  // Numerals 1-24. Larger at 24, 6, 12 and 18.
   GFont font_major = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
   GFont font_minor = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
   graphics_context_set_text_color(ctx, GColorWhite);
@@ -91,12 +96,16 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void inbox_received(DictionaryIterator *iter, void *context) {
-  Tuple *t = dict_find(iter, MESSAGE_KEY_USE_12H);
-  if (t) {
+  Tuple *t;
+  if ((t = dict_find(iter, MESSAGE_KEY_USE_12H))) {
     s_use_12h = (t->value->int32 != 0);
     persist_write_bool(PKEY_USE_12H, s_use_12h);
-    layer_mark_dirty(s_canvas_layer);
   }
+  if ((t = dict_find(iter, MESSAGE_KEY_MIDNIGHT_TOP))) {
+    s_midnight_top = (t->value->int32 != 0);
+    persist_write_bool(PKEY_MIDNIGHT_TOP, s_midnight_top);
+  }
+  layer_mark_dirty(s_canvas_layer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -115,7 +124,8 @@ static void prv_window_unload(Window *window) {
 }
 
 static void prv_init(void) {
-  if (persist_exists(PKEY_USE_12H)) s_use_12h = persist_read_bool(PKEY_USE_12H);
+  if (persist_exists(PKEY_USE_12H))      s_use_12h      = persist_read_bool(PKEY_USE_12H);
+  if (persist_exists(PKEY_MIDNIGHT_TOP)) s_midnight_top = persist_read_bool(PKEY_MIDNIGHT_TOP);
 
   s_window = window_create();
   window_set_window_handlers(s_window, (WindowHandlers) {

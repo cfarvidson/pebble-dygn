@@ -1,7 +1,7 @@
 {
   "name": "dygn",
   "author": "Carl-Fredrik Arvidson",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "keywords": ["pebble-app"],
   "private": true,
   "dependencies": {},
@@ -20,7 +20,8 @@
       "watchface": true
     },
     "messageKeys": [
-      "USE_12H"
+      "USE_12H",
+      "MIDNIGHT_TOP"
     ],
     "resources": {
       "media": []
